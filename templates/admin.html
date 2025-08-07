@@ -1,762 +1,1398 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Parking - Система контроля доступа</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Parking - Админ панель</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --info-color: #3498db;
-            --light-bg: #ecf0f1;
-            --dark-bg: #2c3e50;
-            --text-color: #333;
-            --text-light: #7f8c8d;
-            --border-color: #ddd;
-        }
+      :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #06b6d4;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
 
-        body {
-            background-color: #f5f7fa;
-            color: var(--text-color);
-            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-        }
+      * {
+        box-sizing: border-box;
+      }
 
-        .navbar {
-            background-color: var(--dark-bg) !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem 1rem;
-        }
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--dark);
+      }
 
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.25rem;
-            display: flex;
-            align-items: center;
-        }
+      /* Header */
+      .navbar {
+        background: rgba(31, 41, 59, 0.95) !important;
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: var(--shadow-lg);
+      }
 
-        .navbar-brand i {
-            margin-right: 10px;
-        }
+      .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
 
-        .nav-pills .nav-link {
-            border-radius: 4px;
-            padding: 0.5rem 1rem;
-            margin: 0 0.25rem;
-            font-weight: 500;
-            color: var(--text-light);
-        }
+      /* Main Layout */
+      .main-container {
+        padding: 2rem 0;
+      }
 
-        .nav-pills .nav-link.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
+      .camera-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease;
+      }
 
-        .card {
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
+      .camera-section:hover {
+        transform: translateY(-5px);
+      }
 
-        .card-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 20px;
-            border-bottom: none;
-        }
+      .section-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
 
-        .card-header h4, .card-header h5 {
-            margin: 0;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-        }
+      .section-header h4 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
 
-        .card-header i {
-            margin-right: 8px;
-        }
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
 
+      .status-online {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+      }
+
+      .status-offline {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+      }
+
+      /* Camera Feed */
+      .camera-feed {
+        position: relative;
+        height: 350px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        margin: 1.5rem;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 3px solid var(--border);
+        transition: all 0.3s ease;
+      }
+
+      .camera-feed.active {
+        border-color: var(--success);
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      }
+
+      .camera-feed.capturing {
+        border-color: var(--warning);
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+      }
+
+      .camera-placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.8);
+        color: rgba(255, 255, 255, 0.8);
+        transition: all 0.3s ease;
+      }
+
+      .camera-placeholder i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+      }
+
+      .camera-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .camera-controls {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        right: 15px;
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+      }
+
+      .btn-camera {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: var(--dark);
+        transition: all 0.3s ease;
+        flex: 1;
+      }
+
+      .btn-camera:hover {
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-2px);
+        color: var(--dark);
+      }
+
+      .btn-camera:active {
+        transform: translateY(0);
+      }
+
+      /* Recognition Panel */
+      .recognition-panel {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-radius: 15px;
+        margin: 0 1.5rem 1.5rem;
+      }
+
+      .plate-display {
+        background: linear-gradient(135deg, var(--dark), #374151);
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 900;
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 15px;
+        letter-spacing: 0.2em;
+        font-family: "Courier New", monospace;
+        margin-bottom: 1rem;
+        min-height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .plate-display.recognized {
+        background: linear-gradient(135deg, var(--success), #059669);
+        animation: plateRecognized 0.5s ease;
+      }
+
+      .plate-display.error {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+      }
+
+      @keyframes plateRecognized {
+        0% {
+          transform: scale(0.95);
+          opacity: 0.8;
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .plate-input {
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem;
+        font-weight: 600;
+        text-align: center;
+        font-size: 1.2rem;
+        font-family: "Courier New", monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+      }
+
+      .plate-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        outline: none;
+      }
+
+      /* Barrier Controls */
+      .barrier-controls {
+        padding: 1.5rem;
+        text-align: center;
+      }
+
+      .btn-barrier {
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+        margin: 0.25rem;
+        min-width: 120px;
+      }
+
+      .btn-barrier:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .btn-barrier:active {
+        transform: translateY(0);
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        color: white;
+      }
+
+      .btn-warning {
+        background: linear-gradient(135deg, var(--warning), #d97706);
+        color: white;
+      }
+
+      /* Stats */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        padding: 1.5rem;
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+      }
+
+      .stat-item:hover {
+        background: white;
+        transform: translateY(-2px);
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-label {
+        color: var(--dark);
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+
+      /* Activity Log */
+      .activity-log {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 1.5rem;
+      }
+
+      .log-entry {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid var(--info);
+        transition: all 0.3s ease;
+      }
+
+      .log-entry:hover {
+        background: white;
+        transform: translateX(5px);
+      }
+
+      .log-entry.entry {
+        border-left-color: var(--success);
+      }
+
+      .log-entry.exit {
+        border-left-color: var(--danger);
+      }
+
+      .log-time {
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .log-plate {
+        display: inline-block;
+        background: var(--dark);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-family: "Courier New", monospace;
+        font-weight: 700;
+        font-size: 0.875rem;
+        margin: 0 0.5rem;
+      }
+
+      /* Toast Notifications */
+      .toast {
+        border-radius: 12px;
+        border: none;
+        box-shadow: var(--shadow-lg);
+      }
+
+      .toast-success {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+      }
+
+      .toast-error {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+      }
+
+      .toast-warning {
+        background: linear-gradient(135deg, var(--warning), #d97706);
+        color: white;
+      }
+
+      .toast-info {
+        background: linear-gradient(135deg, var(--info), #0891b2);
+        color: white;
+      }
+
+      /* Loading Animation */
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
         .camera-feed {
-            position: relative;
-            height: 380px;
-            background-color: #000;
-            border-radius: 6px;
-            overflow: hidden;
-            margin: 15px;
-        }
-
-        .camera-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-        }
-
-        .camera-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .camera-controls {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
-            display: flex;
-            gap: 8px;
-            z-index: 100;
-        }
-
-        .btn-camera {
-            flex: 1;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-weight: 500;
-            border: none;
-            background-color: rgba(255, 255, 255, 0.9);
-            transition: all 0.2s ease;
-        }
-
-        .btn-camera:hover {
-            background-color: white;
-            transform: translateY(-1px);
+          height: 250px;
+          margin: 1rem;
         }
 
         .plate-display {
-            background-color: var(--primary-color);
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-            padding: 12px;
-            border-radius: 6px;
-            letter-spacing: 2px;
-            font-family: 'Courier New', monospace;
-            margin-bottom: 15px;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+          font-size: 1.8rem;
+          padding: 1rem;
         }
 
-        .plate-input {
-            background-color: white;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px;
-            font-weight: 500;
-            text-align: center;
-            font-size: 1rem;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 1px;
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
         }
 
-        .plate-input:focus {
-            border-color: var(--info-color);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        .btn-barrier {
+          width: 100%;
+          margin: 0.25rem 0;
         }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-
-        .status-active { background-color: var(--success-color); }
-        .status-warning { background-color: var(--warning-color); }
-        .status-danger { background-color: var(--danger-color); }
-
-        .btn-action {
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-weight: 500;
-            border: none;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .btn-warning {
-            background-color: var(--warning-color);
-            color: white;
-        }
-
-        .btn-info {
-            background-color: var(--info-color);
-            color: white;
-        }
-
-        .btn-action:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .activity-log {
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 15px;
-        }
-
-        .log-entry {
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            border-left: 3px solid var(--info-color);
-            background-color: rgba(236, 240, 241, 0.5);
-            font-size: 0.9rem;
-        }
-
-        .log-entry.entry {
-            border-left-color: var(--success-color);
-            background-color: rgba(39, 174, 96, 0.1);
-        }
-
-        .log-entry.exit {
-            border-left-color: var(--danger-color);
-            background-color: rgba(231, 76, 60, 0.1);
-        }
-
-        .stats-container {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .stat-item {
-            padding: 0 10px;
-        }
-
-        .stat-value {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-light);
-        }
-
-        .badge {
-            font-weight: 500;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-
-        .modal-content {
-            border: none;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 20px;
-        }
-
-        .qr-code-container {
-            width: 200px;
-            height: 200px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--border-color);
-        }
-
-        .toast {
-            border: none;
-            border-radius: 6px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        @media (max-width: 768px) {
-            .camera-feed {
-                height: 250px;
-            }
-            
-            .plate-display {
-                font-size: 1.2rem;
-            }
-            
-            .stats-container {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-parking"></i>Smart Parking
-            </a>
-            <div class="navbar-nav ms-auto">
-                <ul class="nav nav-pills">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="showPage('cameras')">
-                            <i class="fas fa-camera"></i> Камеры
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showPage('parking.html')">
-                            <i class="fas fa-car"></i> Парковка
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showPage('settings')">
-                            <i class="fas fa-cog"></i> Настройки
-                        </a>
-                    </li>
-                </ul>
-            </div>
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+          <i class="fas fa-video me-2"></i>Smart Parking - Камеры
+        </a>
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link" href="/">
+            <i class="fas fa-home me-1"></i>Главная
+          </a>
+          <a class="nav-link" href="/admin">
+            <i class="fas fa-cog me-1"></i>Настройки
+          </a>
         </div>
+      </div>
     </nav>
 
-    <div class="container-fluid mt-3">
-        <div class="row">
-            <!-- Камера въезда -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4><i class="fas fa-sign-in-alt"></i> Камера въезда <span class="status-indicator status-active"></span></h4>
-                    </div>
-                    
-                    <div class="camera-feed" id="entry-camera">
-                        <div class="camera-overlay" id="entry-overlay">
-                            <i class="fas fa-camera fa-3x mb-2"></i>
-                            <div>Мониторинг въезда</div>
-                            <small class="mt-1">Нажмите "Захват" для фото</small>
-                        </div>
-                        <div class="camera-controls">
-                            <button class="btn-camera btn-primary" onclick="captureImage('entry')">
-                                <i class="fas fa-camera me-1"></i> Захват
-                            </button>
-                            <button class="btn-camera btn-warning" onclick="recognizePlate('entry')">
-                                <i class="fas fa-search me-1"></i> Распознать
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-id-card me-2"></i>Распознанный номер:</h6>
-                        <div class="plate-display" id="entry-plate-display">
-                            Ожидание...
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-8">
-                                <input type="text" 
-                                       id="entry-plate-input" 
-                                       class="form-control plate-input"
-                                       placeholder="А123БВ77" 
-                                       maxlength="9">
-                            </div>
-                            <div class="col-4">
-                                <button class="btn btn-success btn-action w-100" onclick="confirmEntry()">
-                                    <i class="fas fa-check me-1"></i> Въезд
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card-footer">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-road me-2"></i>Управление шлагбаумом</h6>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-success btn-action flex-grow-1" onclick="controlBarrier('entry', 'open')">
-                                <i class="fas fa-unlock me-1"></i> Открыть
-                            </button>
-                            <button class="btn btn-danger btn-action flex-grow-1" onclick="controlBarrier('entry', 'close')">
-                                <i class="fas fa-lock me-1"></i> Закрыть
-                            </button>
-                        </div>
-                        <div class="mt-3 text-center">
-                            <small class="text-muted">
-                                <span class="status-indicator status-active"></span>
-                                Шлагбаум готов к работе
-                            </small>
-                        </div>
-                    </div>
-
-                    <div class="stats-container">
-                        <div class="stat-item">
-                            <div class="stat-value" id="entry-today-count">0</div>
-                            <div class="stat-label">За сегодня</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="entry-hour-count">0</div>
-                            <div class="stat-label">За час</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value text-success">●</div>
-                            <div class="stat-label">Статус</div>
-                        </div>
-                    </div>
-                </div>
+    <div class="container-fluid main-container">
+      <div class="row">
+        <!-- Entry Camera -->
+        <div class="col-lg-6">
+          <div class="camera-section">
+            <div
+              class="section-header"
+              style="
+                background: linear-gradient(135deg, var(--success), #059669);
+                color: white;
+              "
+            >
+              <h4>
+                <i class="fas fa-sign-in-alt"></i>
+                Камера въезда
+              </h4>
+              <div class="status-badge status-online" id="entry-status">
+                <i class="fas fa-circle"></i>
+                Онлайн
+              </div>
             </div>
 
-            <!-- Камера выезда -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4><i class="fas fa-sign-out-alt"></i> Камера выезда <span class="status-indicator status-active"></span></h4>
-                    </div>
-                    
-                    <div class="camera-feed" id="exit-camera">
-                        <div class="camera-overlay" id="exit-overlay">
-                            <i class="fas fa-camera fa-3x mb-2"></i>
-                            <div>Мониторинг выезда</div>
-                            <small class="mt-1">Нажмите "Захват" для фото</small>
-                        </div>
-                        <div class="camera-controls">
-                            <button class="btn-camera btn-primary" onclick="captureImage('exit')">
-                                <i class="fas fa-camera me-1"></i> Захват
-                            </button>
-                            <button class="btn-camera btn-warning" onclick="recognizePlate('exit')">
-                                <i class="fas fa-search me-1"></i> Распознать
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-id-card me-2"></i>Распознанный номер:</h6>
-                        <div class="plate-display" id="exit-plate-display">
-                            Ожидание...
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-8">
-                                <input type="text" 
-                                       id="exit-plate-input" 
-                                       class="form-control plate-input"
-                                       placeholder="А123БВ77" 
-                                       maxlength="9">
-                            </div>
-                            <div class="col-4">
-                                <button class="btn btn-danger btn-action w-100" onclick="confirmExit()">
-                                    <i class="fas fa-times me-1"></i> Выезд
-                                </button>
-                            </div>
-                        </div>
-                        <div id="exit-payment-info" class="mt-3" style="display: none;">
-                            <div class="alert alert-warning p-2">
-                                <h6 class="mb-2"><i class="fas fa-credit-card me-2"></i>К оплате: <span id="payment-amount">0</span>₽</h6>
-                                <button class="btn btn-info btn-action btn-sm w-100" onclick="generateQR()">
-                                    <i class="fas fa-qrcode me-1"></i> Сгенерировать QR
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card-footer">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-road me-2"></i>Управление шлагбаумом</h6>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-success btn-action flex-grow-1" onclick="controlBarrier('exit', 'open')">
-                                <i class="fas fa-unlock me-1"></i> Открыть
-                            </button>
-                            <button class="btn btn-danger btn-action flex-grow-1" onclick="controlBarrier('exit', 'close')">
-                                <i class="fas fa-lock me-1"></i> Закрыть
-                            </button>
-                        </div>
-                        <div class="mt-3 text-center">
-                            <small class="text-muted">
-                                <span class="status-indicator status-active"></span>
-                                Шлагбаум готов к работе
-                            </small>
-                        </div>
-                    </div>
-
-                    <div class="stats-container">
-                        <div class="stat-item">
-                            <div class="stat-value" id="exit-today-count">0</div>
-                            <div class="stat-label">За сегодня</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="exit-hour-count">0</div>
-                            <div class="stat-label">За час</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value text-success">●</div>
-                            <div class="stat-label">Статус</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="camera-feed" id="entry-camera">
+              <div class="camera-placeholder" id="entry-placeholder">
+                <i class="fas fa-video"></i>
+                <div>Камера въезда</div>
+                <small>Нажмите "Захват" для получения кадра</small>
+              </div>
+              <div class="camera-controls">
+                <button class="btn-camera" onclick="captureImage('entry')">
+                  <i class="fas fa-camera me-1"></i>Захват
+                </button>
+                <button class="btn-camera" onclick="recognizePlate('entry')">
+                  <i class="fas fa-search me-1"></i>Распознать
+                </button>
+              </div>
             </div>
+
+            <div class="recognition-panel">
+              <h6 class="mb-3">
+                <i class="fas fa-id-card me-2"></i>Распознанный номер:
+              </h6>
+              <div class="plate-display" id="entry-plate-display">
+                Ожидание...
+              </div>
+              <div class="row g-2">
+                <div class="col-8">
+                  <input
+                    type="text"
+                    id="entry-plate-input"
+                    class="form-control plate-input"
+                    placeholder="А123БВ77"
+                    maxlength="9"
+                  />
+                </div>
+                <div class="col-4">
+                  <button
+                    class="btn btn-success w-100 btn-barrier"
+                    onclick="processEntry()"
+                  >
+                    <i class="fas fa-sign-in-alt me-1"></i>Въезд
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="barrier-controls">
+              <h6 class="mb-3">
+                <i class="fas fa-road me-2"></i>Управление шлагбаумом
+              </h6>
+              <button
+                class="btn btn-success btn-barrier"
+                onclick="controlBarrier('entry', 'open')"
+              >
+                <i class="fas fa-unlock me-1"></i>Открыть
+              </button>
+              <button
+                class="btn btn-danger btn-barrier"
+                onclick="controlBarrier('entry', 'close')"
+              >
+                <i class="fas fa-lock me-1"></i>Закрыть
+              </button>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value" id="entry-today">0</div>
+                <div class="stat-label">За сегодня</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="entry-hour">0</div>
+                <div class="stat-label">За час</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" style="color: var(--success)">●</div>
+                <div class="stat-label">Статус</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Журнал активности -->
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="fas fa-history me-2"></i>Журнал активности</h5>
-                    </div>
-                    <div class="activity-log" id="activity-log">
-                        <div class="log-entry entry">
-                            <strong>16:45:23</strong> - Въезд: <span class="badge bg-success">А123БВ77</span>
-                            <small class="text-muted d-block">Шлагбаум открыт автоматически</small>
-                        </div>
-                        <div class="log-entry exit">
-                            <strong>16:40:15</strong> - Выезд: <span class="badge bg-danger">В456СТ99</span>
-                            <small class="text-muted d-block">Оплата: 150₽ • QR-код сгенерирован</small>
-                        </div>
-                        <div class="log-entry entry">
-                            <strong>16:35:08</strong> - Въезд: <span class="badge bg-success">С789ЕР177</span>
-                            <small class="text-muted d-block">Распознано автоматически</small>
-                        </div>
-                    </div>
-                </div>
+        <!-- Exit Camera -->
+        <div class="col-lg-6">
+          <div class="camera-section">
+            <div
+              class="section-header"
+              style="
+                background: linear-gradient(135deg, var(--danger), #dc2626);
+                color: white;
+              "
+            >
+              <h4>
+                <i class="fas fa-sign-out-alt"></i>
+                Камера выезда
+              </h4>
+              <div class="status-badge status-online" id="exit-status">
+                <i class="fas fa-circle"></i>
+                Онлайн
+              </div>
             </div>
-        </div>
-    </div>
 
-    <!-- QR Code Modal -->
-    <div class="modal fade" id="qrModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-qrcode me-2"></i>QR-код для оплаты
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="camera-feed" id="exit-camera">
+              <div class="camera-placeholder" id="exit-placeholder">
+                <i class="fas fa-video"></i>
+                <div>Камера выезда</div>
+                <small>Нажмите "Захват" для получения кадра</small>
+              </div>
+              <div class="camera-controls">
+                <button class="btn-camera" onclick="captureImage('exit')">
+                  <i class="fas fa-camera me-1"></i>Захват
+                </button>
+                <button class="btn-camera" onclick="recognizePlate('exit')">
+                  <i class="fas fa-search me-1"></i>Распознать
+                </button>
+              </div>
+            </div>
+
+            <div class="recognition-panel">
+              <h6 class="mb-3">
+                <i class="fas fa-id-card me-2"></i>Распознанный номер:
+              </h6>
+              <div class="plate-display" id="exit-plate-display">
+                Ожидание...
+              </div>
+              <div class="row g-2">
+                <div class="col-8">
+                  <input
+                    type="text"
+                    id="exit-plate-input"
+                    class="form-control plate-input"
+                    placeholder="А123БВ77"
+                    maxlength="9"
+                  />
                 </div>
-                <div class="modal-body text-center p-4">
-                    <div class="mb-3">
-                        <h5>Автомобиль: <span class="text-primary" id="qr-plate">А123БВ77</span></h5>
-                        <h5>Сумма: <span class="text-danger" id="qr-amount">150₽</span></h5>
-                    </div>
-                    <div class="qr-code-container mb-3" id="qr-code-container">
-                        <div>
-                            <i class="fas fa-qrcode fa-3x mb-2"></i><br>
-                            QR КОД<br>
-                            <small>Для оплаты</small>
-                        </div>
-                    </div>
-                    <p class="text-muted">Отсканируйте QR-код для оплаты парковки</p>
-                    <button class="btn btn-success btn-action" onclick="simulatePayment()">
-                        <i class="fas fa-check me-1"></i> Симулировать оплату
+                <div class="col-4">
+                  <button
+                    class="btn btn-warning w-100 btn-barrier"
+                    onclick="processExit()"
+                  >
+                    <i class="fas fa-sign-out-alt me-1"></i>Выезд
+                  </button>
+                </div>
+              </div>
+              <div id="payment-info" class="mt-3" style="display: none">
+                <div class="alert alert-warning">
+                  <strong>К оплате: <span id="payment-amount">0</span>₽</strong>
+                  <div class="mt-2">
+                    <button
+                      class="btn btn-primary btn-sm"
+                      onclick="generateQR()"
+                    >
+                      <i class="fas fa-qrcode me-1"></i>QR-код
                     </button>
+                    <button class="btn btn-success btn-sm" onclick="markPaid()">
+                      <i class="fas fa-check me-1"></i>Оплачено
+                    </button>
+                  </div>
                 </div>
+              </div>
             </div>
+
+            <div class="barrier-controls">
+              <h6 class="mb-3">
+                <i class="fas fa-road me-2"></i>Управление шлагбаумом
+              </h6>
+              <button
+                class="btn btn-success btn-barrier"
+                onclick="controlBarrier('exit', 'open')"
+              >
+                <i class="fas fa-unlock me-1"></i>Открыть
+              </button>
+              <button
+                class="btn btn-danger btn-barrier"
+                onclick="controlBarrier('exit', 'close')"
+              >
+                <i class="fas fa-lock me-1"></i>Закрыть
+              </button>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value" id="exit-today">0</div>
+                <div class="stat-label">За сегодня</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="exit-hour">0</div>
+                <div class="stat-label">За час</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" style="color: var(--success)">●</div>
+                <div class="stat-label">Статус</div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- Activity Log -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="camera-section">
+            <div
+              class="section-header"
+              style="
+                background: linear-gradient(135deg, var(--info), #0891b2);
+                color: white;
+              "
+            >
+              <h4>
+                <i class="fas fa-history"></i>
+                Журнал активности
+              </h4>
+              <button class="btn btn-light btn-sm" onclick="clearLog()">
+                <i class="fas fa-trash me-1"></i>Очистить
+              </button>
+            </div>
+            <div class="activity-log" id="activity-log">
+              <div class="text-center text-muted">
+                <i class="fas fa-clock fa-2x mb-3"></i>
+                <p>Журнал пуст. События будут отображаться здесь.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Toast Container -->
-    <div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container"></div>
+    <div
+      class="toast-container position-fixed top-0 end-0 p-3"
+      id="toast-container"
+    ></div>
+
+    <!-- QR Modal -->
+    <div class="modal fade" id="qrModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px">
+          <div
+            class="modal-header"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--primary),
+                var(--primary-dark)
+              );
+              color: white;
+            "
+          >
+            <h5 class="modal-title">
+              <i class="fas fa-qrcode me-2"></i>QR-код для оплаты
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body text-center p-4">
+            <div class="mb-3">
+              <h4>Номер: <span class="text-primary" id="qr-plate">-</span></h4>
+              <h4>Сумма: <span class="text-danger" id="qr-amount">0₽</span></h4>
+            </div>
+            <div id="qr-code" class="mb-3">
+              <div
+                style="
+                  width: 200px;
+                  height: 200px;
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--primary-dark)
+                  );
+                  margin: 0 auto;
+                  border-radius: 15px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: white;
+                "
+              >
+                <div>
+                  <i class="fas fa-qrcode fa-4x mb-2"></i>
+                  <div>QR КОД</div>
+                </div>
+              </div>
+            </div>
+            <button
+              class="btn btn-success btn-barrier"
+              onclick="simulatePayment()"
+            >
+              <i class="fas fa-check me-1"></i>Симулировать оплату
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Глобальные перемены
-        let currentVehicleData = {};
-        let activityLog = [];
+      // Global state
+      let stats = {
+        entry: { today: 0, hour: 0 },
+        exit: { today: 0, hour: 0 },
+      };
 
-        // Инициализация приложения
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚗 Smart Parking Camera System инициализирована');
-            showToast('Система камер запущена', 'success');
-            
-            // Запускаем автообновление статистики
-            updateCameraStats();
-            setInterval(updateCameraStats, 10000);
-            
-            // Форматирование ввода номеров
-            setupPlateInputs();
-            
-            // Симуляция автоматического мониторинга
-            startAutoMonitoring();
+      let currentVehicle = null;
+      let activityLog = [];
+
+      // Initialize application
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Smart Parking Admin Panel loaded");
+        showToast("Система камер инициализирована", "success");
+
+        setupPlateInputs();
+        loadStats();
+
+        // Simulate some initial activity
+        setTimeout(() => {
+          addLogEntry("Система запущена", "system");
+        }, 1000);
+      });
+
+      // Setup plate number inputs
+      function setupPlateInputs() {
+        const inputs = ["entry-plate-input", "exit-plate-input"];
+        inputs.forEach((id) => {
+          const input = document.getElementById(id);
+          input.addEventListener("input", function (e) {
+            let value = e.target.value
+              .toUpperCase()
+              .replace(/[^А-ЯA-Z0-9]/g, "");
+            if (value.length > 9) value = value.substring(0, 9);
+            e.target.value = value;
+          });
+
+          input.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              if (id.includes("entry")) {
+                processEntry();
+              } else {
+                processExit();
+              }
+            }
+          });
+        });
+      }
+
+      // Capture image from camera
+      async function captureImage(cameraType) {
+        const cameraFeed = document.getElementById(`${cameraType}-camera`);
+        const placeholder = document.getElementById(
+          `${cameraType}-placeholder`
+        );
+
+        showToast(
+          `Захват изображения с камеры ${
+            cameraType === "entry" ? "въезда" : "выезда"
+          }...`,
+          "info"
+        );
+
+        try {
+          cameraFeed.classList.add("capturing");
+
+          // Show loading
+          placeholder.innerHTML = `
+                    <div class="spinner"></div>
+                    <div class="mt-3">Захват изображения...</div>
+                `;
+
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          // Create mock image
+          const img = document.createElement("img");
+          img.className = "camera-image";
+          img.src = generateMockCarImage();
+
+          // Replace placeholder with image
+          placeholder.style.display = "none";
+          cameraFeed.appendChild(img);
+          cameraFeed.classList.remove("capturing");
+          cameraFeed.classList.add("active");
+
+          showToast("Изображение захвачено успешно", "success");
+
+          // Auto recognize after capture
+          setTimeout(() => recognizePlate(cameraType), 1500);
+        } catch (error) {
+          showToast("Ошибка захвата изображения", "error");
+          cameraFeed.classList.remove("capturing");
+        }
+      }
+
+      // Recognize license plate
+      async function recognizePlate(cameraType) {
+        const plateDisplay = document.getElementById(
+          `${cameraType}-plate-display`
+        );
+        const plateInput = document.getElementById(`${cameraType}-plate-input`);
+
+        showToast("Распознавание номерного знака...", "info");
+
+        try {
+          // Show processing
+          plateDisplay.className = "plate-display";
+          plateDisplay.innerHTML = '<div class="spinner"></div>';
+
+          // Simulate recognition
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+
+          const recognizedPlate = generateMockPlate();
+
+          plateDisplay.textContent = recognizedPlate;
+          plateDisplay.classList.add("recognized");
+          plateInput.value = recognizedPlate;
+
+          showToast(`Номер распознан: ${recognizedPlate}`, "success");
+        } catch (error) {
+          plateDisplay.textContent = "Ошибка распознавания";
+          plateDisplay.classList.add("error");
+          showToast("Ошибка распознавания номера", "error");
+        }
+      }
+
+      // Process vehicle entry
+      async function processEntry() {
+        const plateInput = document.getElementById("entry-plate-input");
+        const plate = plateInput.value.trim();
+
+        if (!plate) {
+          showToast("Введите номер автомобиля", "warning");
+          return;
+        }
+
+        if (!validatePlateNumber(plate)) {
+          showToast("Неверный формат номера", "error");
+          return;
+        }
+
+        try {
+          showToast("Обработка въезда...", "info");
+
+          // Simulate API call
+          const response = await fetch("/api/vehicles/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              plate_number: plate,
+              entry_image: "mock_entry_" + Date.now() + ".jpg",
+            }),
+          });
+
+          if (response.ok) {
+            // Open barrier
+            await controlBarrier("entry", "open");
+
+            // Update stats
+            stats.entry.today++;
+            stats.entry.hour++;
+            updateStatsDisplay();
+
+            // Add to log
+            addLogEntry(`Въезд: ${plate}`, "entry");
+
+            // Reset camera
+            resetCamera("entry");
+
+            showToast(`Въезд подтвержден: ${plate}`, "success");
+
+            // Auto close barrier
+            setTimeout(() => controlBarrier("entry", "close"), 5000);
+          } else {
+            throw new Error("API error");
+          }
+        } catch (error) {
+          // Fallback to mock processing
+          showToast("Режим эмуляции: въезд обработан", "warning");
+
+          // Open barrier anyway
+          await controlBarrier("entry", "open");
+          stats.entry.today++;
+          stats.entry.hour++;
+          updateStatsDisplay();
+          addLogEntry(`Въезд: ${plate}`, "entry");
+          resetCamera("entry");
+
+          setTimeout(() => controlBarrier("entry", "close"), 5000);
+        }
+      }
+
+      // Process vehicle exit
+      async function processExit() {
+        const plateInput = document.getElementById("exit-plate-input");
+        const plate = plateInput.value.trim();
+
+        if (!plate) {
+          showToast("Введите номер автомобиля", "warning");
+          return;
+        }
+
+        if (!validatePlateNumber(plate)) {
+          showToast("Неверный формат номера", "error");
+          return;
+        }
+
+        try {
+          showToast("Обработка выезда...", "info");
+
+          // Simulate parking fee calculation
+          const parkingFee = calculateMockParkingFee();
+
+          if (parkingFee > 0) {
+            // Show payment info
+            document.getElementById("payment-amount").textContent = parkingFee;
+            document.getElementById("payment-info").style.display = "block";
+            currentVehicle = { plate, fee: parkingFee };
+
+            addLogEntry(`Выезд: ${plate} - к оплате ${parkingFee}₽`, "exit");
+            showToast(`Требуется оплата: ${parkingFee}₽`, "warning");
+          } else {
+            // Free parking - open barrier
+            await controlBarrier("exit", "open");
+            stats.exit.today++;
+            stats.exit.hour++;
+            updateStatsDisplay();
+            addLogEntry(`Бесплатный выезд: ${plate}`, "exit");
+            resetCamera("exit");
+            showToast(`Бесплатный выезд: ${plate}`, "success");
+            setTimeout(() => controlBarrier("exit", "close"), 5000);
+          }
+        } catch (error) {
+          showToast("Ошибка обработки выезда", "error");
+        }
+      }
+
+      // Control barrier
+      async function controlBarrier(barrierType, action) {
+        const button = event?.target;
+        const originalText = button?.innerHTML;
+
+        try {
+          if (button) {
+            button.disabled = true;
+            button.innerHTML = `<div class="spinner" style="width: 20px; height: 20px;"></div>`;
+          }
+
+          showToast(
+            `${action === "open" ? "Открытие" : "Закрытие"} шлагбаума ${
+              barrierType === "entry" ? "въезда" : "выезда"
+            }...`,
+            "info"
+          );
+
+          // Simulate API call
+          const response = await fetch(
+            `/api/barrier/${barrierType}/${action}`,
+            {
+              method: "POST",
+            }
+          );
+
+          // Simulate delay
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          const actionText = action === "open" ? "открыт" : "закрыт";
+          const barrierText = barrierType === "entry" ? "въезда" : "выезда";
+
+          showToast(`Шлагбаум ${barrierText} ${actionText}`, "success");
+          addLogEntry(`Шлагбаум ${barrierText} ${actionText}`, "system");
+
+          return true;
+        } catch (error) {
+          showToast("Режим эмуляции: команда отправлена", "warning");
+          return true;
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.innerHTML = originalText;
+          }
+        }
+      }
+
+      // Generate QR code for payment
+      function generateQR() {
+        if (!currentVehicle) {
+          showToast("Нет данных для генерации QR-кода", "error");
+          return;
+        }
+
+        document.getElementById("qr-plate").textContent = currentVehicle.plate;
+        document.getElementById("qr-amount").textContent =
+          currentVehicle.fee + "₽";
+
+        const modal = new bootstrap.Modal(document.getElementById("qrModal"));
+        modal.show();
+
+        showToast("QR-код сгенерирован", "success");
+      }
+
+      // Mark as paid and open barrier
+      async function markPaid() {
+        if (!currentVehicle) return;
+
+        try {
+          showToast("Обработка оплаты...", "info");
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+
+          // Open barrier
+          await controlBarrier("exit", "open");
+
+          // Update stats
+          stats.exit.today++;
+          stats.exit.hour++;
+          updateStatsDisplay();
+
+          // Hide payment info
+          document.getElementById("payment-info").style.display = "none";
+
+          // Reset camera
+          resetCamera("exit");
+
+          addLogEntry(
+            `Оплата ${currentVehicle.plate}: ${currentVehicle.fee}₽ - выезд разрешен`,
+            "exit"
+          );
+          showToast(`Оплата получена: ${currentVehicle.fee}₽`, "success");
+
+          currentVehicle = null;
+
+          // Auto close barrier
+          setTimeout(() => controlBarrier("exit", "close"), 5000);
+        } catch (error) {
+          showToast("Ошибка обработки оплаты", "error");
+        }
+      }
+
+      // Simulate payment
+      async function simulatePayment() {
+        if (!currentVehicle) return;
+
+        showToast("Симуляция оплаты...", "info");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("qrModal")
+        );
+        modal.hide();
+
+        // Process payment
+        await markPaid();
+      }
+
+      // Reset camera view
+      function resetCamera(cameraType) {
+        const cameraFeed = document.getElementById(`${cameraType}-camera`);
+        const placeholder = document.getElementById(
+          `${cameraType}-placeholder`
+        );
+        const plateDisplay = document.getElementById(
+          `${cameraType}-plate-display`
+        );
+        const plateInput = document.getElementById(`${cameraType}-plate-input`);
+
+        // Remove existing image
+        const existingImg = cameraFeed.querySelector(".camera-image");
+        if (existingImg) {
+          existingImg.remove();
+        }
+
+        // Reset placeholder
+        placeholder.style.display = "flex";
+        placeholder.innerHTML = `
+                <i class="fas fa-video"></i>
+                <div>Камера ${
+                  cameraType === "entry" ? "въезда" : "выезда"
+                }</div>
+                <small>Нажмите "Захват" для получения кадра</small>
+            `;
+
+        // Reset classes
+        cameraFeed.className = "camera-feed";
+
+        // Reset plate display
+        plateDisplay.className = "plate-display";
+        plateDisplay.textContent = "Ожидание...";
+        plateInput.value = "";
+      }
+
+      // Add entry to activity log
+      function addLogEntry(message, type) {
+        const logContainer = document.getElementById("activity-log");
+        const timestamp = new Date().toLocaleTimeString("ru-RU");
+
+        // Remove empty message if exists
+        const emptyMessage = logContainer.querySelector(".text-center");
+        if (emptyMessage) {
+          emptyMessage.remove();
+        }
+
+        const entry = document.createElement("div");
+        entry.className = `log-entry ${type}`;
+
+        let icon = "fas fa-info-circle";
+        if (type === "entry") icon = "fas fa-sign-in-alt";
+        else if (type === "exit") icon = "fas fa-sign-out-alt";
+        else if (type === "system") icon = "fas fa-cog";
+
+        entry.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="${icon} me-2"></i>
+                    <div class="flex-grow-1">
+                        <span class="log-time">${timestamp}</span> - ${message}
+                    </div>
+                </div>
+            `;
+
+        logContainer.insertBefore(entry, logContainer.firstChild);
+
+        // Keep only last 50 entries
+        const entries = logContainer.querySelectorAll(".log-entry");
+        if (entries.length > 50) {
+          entries[entries.length - 1].remove();
+        }
+      }
+
+      // Clear activity log
+      function clearLog() {
+        const logContainer = document.getElementById("activity-log");
+        logContainer.innerHTML = `
+                <div class="text-center text-muted">
+                    <i class="fas fa-clock fa-2x mb-3"></i>
+                    <p>Журнал пуст. События будут отображаться здесь.</p>
+                </div>
+            `;
+        showToast("Журнал очищен", "info");
+      }
+
+      // Update statistics display
+      function updateStatsDisplay() {
+        document.getElementById("entry-today").textContent = stats.entry.today;
+        document.getElementById("entry-hour").textContent = stats.entry.hour;
+        document.getElementById("exit-today").textContent = stats.exit.today;
+        document.getElementById("exit-hour").textContent = stats.exit.hour;
+      }
+
+      // Load statistics
+      function loadStats() {
+        // Simulate loading from localStorage or API
+        const savedStats = localStorage.getItem("parkingStats");
+        if (savedStats) {
+          stats = JSON.parse(savedStats);
+          updateStatsDisplay();
+        }
+
+        // Reset hourly stats every hour
+        setInterval(() => {
+          stats.entry.hour = 0;
+          stats.exit.hour = 0;
+          updateStatsDisplay();
+          addLogEntry("Часовая статистика сброшена", "system");
+        }, 3600000); // 1 hour
+
+        // Save stats periodically
+        setInterval(() => {
+          localStorage.setItem("parkingStats", JSON.stringify(stats));
+        }, 30000); // Every 30 seconds
+      }
+
+      // Utility functions
+      function validatePlateNumber(plate) {
+        const patterns = [
+          /^[А-Я]\d{3}[А-Я]{2}\d{2,3}$/, // A123BC77
+          /^[А-Я]{2}\d{3}\d{2,3}$/, // AB12377
+        ];
+        return patterns.some((pattern) => pattern.test(plate));
+      }
+
+      function generateMockPlate() {
+        const letters = "АВЕКМНОРСТУХ";
+        const numbers = "0123456789";
+        const regions = ["77", "99", "177", "199", "777"];
+
+        return (
+          letters[Math.floor(Math.random() * letters.length)] +
+          Array(3)
+            .fill()
+            .map(() => numbers[Math.floor(Math.random() * numbers.length)])
+            .join("") +
+          Array(2)
+            .fill()
+            .map(() => letters[Math.floor(Math.random() * letters.length)])
+            .join("") +
+          regions[Math.floor(Math.random() * regions.length)]
+        );
+      }
+
+      function generateMockCarImage() {
+        // Generate a simple colored rectangle as mock car image
+        const canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext("2d");
+
+        // Background
+        ctx.fillStyle = "#2a2a2a";
+        ctx.fillRect(0, 0, 640, 480);
+
+        // Car silhouette
+        ctx.fillStyle = "#4a90e2";
+        ctx.fillRect(100, 200, 440, 180);
+
+        // License plate area
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(250, 320, 140, 40);
+
+        // Mock license plate text
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 18px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(generateMockPlate(), 320, 345);
+
+        return canvas.toDataURL("image/jpeg", 0.8);
+      }
+
+      function calculateMockParkingFee() {
+        // Simulate random parking fee (0 for free, or 50-300 rubles)
+        const isFree = Math.random() < 0.3; // 30% chance of free parking
+        if (isFree) return 0;
+
+        return Math.floor(Math.random() * 251) + 50; // 50-300 rubles
+      }
+
+      function showToast(message, type = "info") {
+        const toastContainer = document.getElementById("toast-container");
+        const toastId = "toast-" + Date.now();
+
+        const typeClasses = {
+          success: "toast-success",
+          error: "toast-error",
+          warning: "toast-warning",
+          info: "toast-info",
+        };
+
+        const icons = {
+          success: "fas fa-check-circle",
+          error: "fas fa-exclamation-circle",
+          warning: "fas fa-exclamation-triangle",
+          info: "fas fa-info-circle",
+        };
+
+        const toast = document.createElement("div");
+        toast.id = toastId;
+        toast.className = `toast ${typeClasses[type] || "toast-info"}`;
+        toast.setAttribute("role", "alert");
+
+        toast.innerHTML = `
+                <div class="toast-header">
+                    <i class="${icons[type] || icons.info} me-2"></i>
+                    <strong class="me-auto">Smart Parking</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+
+        toastContainer.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast, {
+          autohide: true,
+          delay: type === "error" ? 5000 : 3000,
         });
 
-        // Настройка полей ввода номеров
-        function setupPlateInputs() {
-            ['entry-plate-input', 'exit-plate-input'].forEach(id => {
-                const input = document.getElementById(id);
-                input.addEventListener('input', function(e) {
-                    let value = e.target.value.toUpperCase().replace(/[^А-ЯA-Z0-9]/g, '');
-                    if (value.length > 9) value = value.substring(0, 9);
-                    e.target.value = value;
-                });
+        bsToast.show();
 
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        if (id.includes('entry')) {
-                            confirmEntry();
-                        } else {
-                            confirmExit();
-                        }
-                    }
-                });
-            });
-        }
+        // Remove from DOM after hide
+        toast.addEventListener("hidden.bs.toast", () => {
+          toast.remove();
+        });
+      }
 
-        // Захват изображения с камеры
-        async function captureImage(cameraType) {
-            const cameraFeed = document.getElementById(`${cameraType}-camera`);
-            const overlay = document.getElementById(`${cameraType}-overlay`);
-            
-            showToast(`Захват изображения с камеры ${cameraType === 'entry' ? 'въезда' : 'выезда'}...`, 'info');
-            
-            try {
-                // Симуляция захвата (в реальности здесь будет API вызов)
-                cameraFeed.classList.add('active');
-                
-                // Создаем фейковое изображение
-                const img = document.createElement('img');
-                img.className = 'camera-image';
-                img.src = generateMockCarImage(cameraType);
-                
-                // Скрываем оверлей и показываем изображение
-                overlay.style.display = 'none';
-                cameraFeed.appendChild(img);
-                
-                showToast('Изображение захвачено успешно', 'success');
-                
-                // Автоматическое распознавание через 2 секунды
-                setTimeout(() => recognizePlate(cameraType), 2000);
-                
-            } catch (error) {
-                showToast('Ошибка захвата изображения', 'error');
-                console.error('Capture error:', error);
-            }
-        }
+      // Auto-refresh connection status
+      setInterval(() => {
+        // Simulate connection check
+        const isConnected = Math.random() > 0.1; // 90% uptime
 
-        // Распознавание номерного знака
-        async function recognizePlate(cameraType) {
-            showToast('Распознавание номерного знака...', 'info');
-            
-            try {
-                // Симуляция распознавания
-                await new Promise(resolve => setTimeout(resolve, 3000));
-                
-                const mockPlate = generateMockPlate();
-                const plateDisplay = document.getElementById(`${cameraType}-plate-display`);
-                const plateInput = document.getElementById(`${cameraType}-plate-input`);
-                
-                plateDisplay.textContent = mockPlate;
-                plateDisplay.style.background = 'linear-gradient(135deg, var(--success-color), #059669)';
-                plateInput.value = mockPlate;
-                
-                showToast(`Номер распознан: ${mockPlate}`, 'success');
-                
-                // Сохраняем данные
-                currentVehicleData[cameraType] = {
-                    plate: mockPlate,
-                    timestamp: new Date(),
-                    image: `mock_${cameraType}_${Date.now()}.jpg`
-                };
-                
-            } catch (error) {
-                showToast('Ошибка распознавания номера', 'error');
-                console.error('Recognition error:', error);
-            }
-        }
-
-        // Подтверждение въезда
-        async function confirmEntry() {
-            const plateInput = document.getElementById('entry-plate-input');
-            const plate = plateInput.value.trim();
-            
-            if (!plate) {
-                showToast('Введите номер автомобиля', 'warning');
-                return;
-            }
-
-            if (!validatePlateNumber(plate)) {
-                showToast('Неверный формат номера', 'error');
-                return;
-            }
-
-            try {
-                showToast('Обработка въезда...', 'info');
-                
-                // Отправляем данные на сервер
-                const entryData = {
-                    plate_number: plate,
-                    entry_image: currentVehicleData.entry?.image || null,
-                    timestamp: new Date().toISOString()
-                };
-
-                // Симуляция API вызова
-                const response = await simulateAPICall('/api/vehicles/', 'POST', entryData);
-                
-                if (response.success) {
-                    // Открываем шлагбаум
-                    await controlBarrier('entry', 'open');
-                    
-                    // Добавляем в журнал
-                    addActivityLog(`Въезд: ${plate}`, 'entry');
-                    
-                    // Очищаем поля
-                    resetCamera('entry');
-                    
-                    showToast(`Въезд подтвержден: ${plate}`, 'success');
-                    
-                    // Автоматически закрываем шлагбаум через 5 секунд
-                    setTimeout(() => controlBarrier('entry', 'close'), 5000);
-                } else {
-                    showToast('Ошибка обработки въезда', 'error');
-                }
-                
-            } catch (error) {
-                showToast('Ошибка соединения с сервером', 'error');
-                console.error('Entry error:', error);
-            }
-        }
-
-        // Подтверждение выезда
-        async function confirmExit() {
-            const plateInput = document.getElementById('exit-plate-input');
-            const plate = plateInput.value.trim();
-            
-            if (!plate) {
-                showToast('Введите номер автомобиля', 'warning');
-                return;
-            }
-
-            if (!validatePlateNumber(plate)) {
-                showToast('Неверный формат номера', 'error');
-                return;
-            }
-
-            try {
-                showToast('Обработка выезда...', 'info');
-                
-                // Получаем данные о въезде и рассчитываем стоимость
-                const vehicleData = await getVehicleEntryData(plate);
-                
-                if (!vehicleData) {
-                    showToast('Запись о въезде не найдена', 'warning
+        ["entry-status", "exit-status"].forEach((id) => {
+          const statusBadge = document.getElementById(id);
+          if (isConnected) {
+            statusBadge.className = "status-badge status-online";
+            statusBadge.innerHTML = '<i class="fas fa-circle"></i> Онлайн';
+          } else {
+            statusBadge.className = "status-badge status-offline";
+            statusBadge.innerHTML = '<i class="fas fa-circle"></i> Офлайн';
+          }
+        });
+      }, 10000);
+    </script>
+  </body>
+</html>

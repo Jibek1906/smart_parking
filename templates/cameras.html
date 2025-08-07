@@ -1,0 +1,73 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4">
+  <h2>🎥 Камеры</h2>
+  <div class="row">
+    <!-- Камера въезда -->
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header bg-success text-white">Камера въезда</div>
+        <div class="card-body">
+          <button
+            onclick="controlBarrier('entry', 'open')"
+            class="btn btn-success mb-2"
+          >
+            Открыть шлагбаум
+          </button>
+          <button
+            onclick="controlBarrier('entry', 'close')"
+            class="btn btn-danger mb-2"
+          >
+            Закрыть шлагбаум
+          </button>
+          <button onclick="capturePlate('entry')" class="btn btn-primary">
+            Сделать снимок
+          </button>
+          <input
+            type="text"
+            id="entry-plate"
+            class="form-control mt-2"
+            placeholder="Коррекция номера"
+          />
+          <button onclick="correctPlate('entry')" class="btn btn-warning mt-2">
+            ✏️ Исправить номер
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Камера выезда -->
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header bg-danger text-white">Камера выезда</div>
+        <div class="card-body">
+          <button
+            onclick="controlBarrier('exit', 'open')"
+            class="btn btn-success mb-2"
+          >
+            Открыть шлагбаум
+          </button>
+          <button
+            onclick="controlBarrier('exit', 'close')"
+            class="btn btn-danger mb-2"
+          >
+            Закрыть шлагбаум
+          </button>
+          <button onclick="capturePlate('exit')" class="btn btn-primary">
+            Сделать снимок
+          </button>
+          <input
+            type="text"
+            id="exit-plate"
+            class="form-control mt-2"
+            placeholder="Коррекция номера"
+          />
+          <button onclick="correctPlate('exit')" class="btn btn-warning mt-2">
+            ✏️ Исправить номер
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/js/cameras.js"></script>
+{% endblock %}

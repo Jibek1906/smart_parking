@@ -1,112 +1,850 @@
+<!-- templates/admin.html (обновлённый полный файл) -->
 <!DOCTYPE html>
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Умная Парковка</title>
+    <title>Smart Parking - Админ панель</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <link href="/static/css/style.css" rel="stylesheet" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Стили — можно оставить ваши существующие */
+      :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #06b6d4;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --border: #e5e7eb;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--dark);
+      }
+      .navbar {
+        background: rgba(31, 41, 59, 0.95) !important;
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: var(--shadow-lg);
+      }
+      .camera-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease;
+      }
+      .camera-feed {
+        position: relative;
+        height: 350px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        margin: 1.5rem;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 3px solid var(--border);
+        transition: all 0.3s ease;
+      }
+      .camera-placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.8);
+        transition: all 0.3s ease;
+      }
+      .plate-display {
+        background: linear-gradient(135deg, var(--dark), #374151);
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 900;
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 15px;
+        letter-spacing: 0.2em;
+        font-family: "Courier New", monospace;
+        margin-bottom: 1rem;
+        min-height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .plate-display.recognized {
+        background: linear-gradient(135deg, var(--success), #059669);
+        animation: plateRecognized 0.5s ease;
+      }
+      .plate-display.error {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+      }
+      .plate-input {
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem;
+        font-weight: 600;
+        text-align: center;
+        font-size: 1.2rem;
+        font-family: "Courier New", monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+      }
+      .btn-camera {
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: var(--dark);
+        transition: all 0.3s ease;
+        flex: 1;
+      }
+      .btn-camera:hover {
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-2px);
+        color: var(--dark);
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .settings-card {
+        margin: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.95);
+      }
+      .log-entry {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid var(--info);
+        transition: all 0.3s ease;
+      }
+      .log-entry.entry {
+        border-left-color: var(--success);
+      }
+      .log-entry.exit {
+        border-left-color: var(--danger);
+      }
+    </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container">
-        <a class="navbar-brand" href="/">🚗 Умная Парковка</a>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+          <i class="fas fa-video me-2"></i>Smart Parking - Камеры</a
+        >
         <div class="navbar-nav ms-auto">
-          <a class="nav-link" href="/admin">Админ-панель</a>
+          <a class="nav-link" href="/">
+            <i class="fas fa-home me-1"></i>Главная</a
+          >
+          <a class="nav-link" href="/admin">
+            <i class="fas fa-cog me-1"></i>Настройки</a
+          >
         </div>
       </div>
     </nav>
 
-    <div class="container mt-4">
+    <div class="container-fluid main-container">
       <div class="row">
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header bg-success text-white">
-              <h5 class="mb-0">
-                🚗 На парковке ({{ current_vehicles|length }})
-              </h5>
-            </div>
-            <div class="card-body" style="max-height: 400px; overflow-y: auto">
-              {% if current_vehicles %}
-              <div class="list-group">
-                {% for vehicle in current_vehicles %}
-                <div class="list-group-item">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">{{ vehicle.plate_number }}</h6>
-                    <small
-                      >{{ vehicle.entry_time.strftime('%H:%M %d.%m') }}</small
-                    >
-                  </div>
-                  <small class="text-muted">
-                    Въезд: {{ vehicle.entry_time.strftime('%d.%m.%Y %H:%M:%S')
-                    }}
-                  </small>
-                </div>
-                {% endfor %}
+        <!-- Entry Camera -->
+        <div class="col-lg-6">
+          <div class="camera-section">
+            <div
+              class="section-header"
+              style="
+                background: linear-gradient(135deg, var(--success), #059669);
+                color: white;
+              "
+            >
+              <h4><i class="fas fa-sign-in-alt"></i> Камера въезда</h4>
+              <div class="status-badge status-online" id="entry-status">
+                <i class="fas fa-circle"></i> Онлайн
               </div>
-              {% else %}
-              <p class="text-muted">Парковка пуста</p>
-              {% endif %}
+            </div>
+
+            <div class="camera-feed" id="entry-camera">
+              <div class="camera-placeholder" id="entry-placeholder">
+                <i class="fas fa-video"></i>
+                <div>Камера въезда</div>
+                <small>Нажмите "Захват" для получения кадра</small>
+              </div>
+              <div class="camera-controls">
+                <button class="btn-camera" onclick="captureImage('entry')">
+                  <i class="fas fa-camera me-1"></i>Захват
+                </button>
+                <button class="btn-camera" onclick="recognizePlate('entry')">
+                  <i class="fas fa-search me-1"></i>Распознать
+                </button>
+              </div>
+            </div>
+
+            <div class="recognition-panel">
+              <h6 class="mb-3">
+                <i class="fas fa-id-card me-2"></i>Распознанный номер:
+              </h6>
+              <div class="plate-display" id="entry-plate-display">
+                Ожидание...
+              </div>
+              <div class="row g-2">
+                <div class="col-8">
+                  <input
+                    type="text"
+                    id="entry-plate-input"
+                    class="form-control plate-input"
+                    placeholder="А123БВ77"
+                    maxlength="9"
+                  />
+                </div>
+                <div class="col-4">
+                  <button
+                    class="btn btn-success w-100 btn-barrier"
+                    onclick="processEntry()"
+                  >
+                    <i class="fas fa-sign-in-alt me-1"></i>Въезд
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="barrier-controls">
+              <h6 class="mb-3">
+                <i class="fas fa-road me-2"></i>Управление шлагбаумом
+              </h6>
+              <button
+                class="btn btn-success btn-barrier"
+                onclick="controlBarrier('entry', 'open')"
+              >
+                <i class="fas fa-unlock me-1"></i>Открыть
+              </button>
+              <button
+                class="btn btn-danger btn-barrier"
+                onclick="controlBarrier('entry', 'close')"
+              >
+                <i class="fas fa-lock me-1"></i>Закрыть
+              </button>
             </div>
           </div>
         </div>
 
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header bg-warning text-dark">
-              <h5 class="mb-0">
-                💰 Ожидают оплаты ({{ unpaid_vehicles|length }})
-              </h5>
-            </div>
-            <div class="card-body" style="max-height: 400px; overflow-y: auto">
-              {% if unpaid_vehicles %}
-              <div class="list-group">
-                {% for vehicle in unpaid_vehicles %}
-                <div class="list-group-item">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">{{ vehicle.plate_number }}</h6>
-                    <span class="badge bg-warning"
-                      >{{ vehicle.parking_fee }} ₽</span
-                    >
-                  </div>
-                  <p class="mb-1">
-                    <small
-                      >Въезд: {{ vehicle.entry_time.strftime('%d.%m %H:%M')
-                      }}</small
-                    ><br />
-                    <small
-                      >Выезд: {{ vehicle.exit_time.strftime('%d.%m %H:%M')
-                      }}</small
-                    >
-                  </p>
-                  <a
-                    href="/payment/{{ vehicle.id }}"
-                    class="btn btn-primary btn-sm"
-                  >
-                    Оплатить
-                  </a>
-                </div>
-                {% endfor %}
+        <!-- Exit Camera -->
+        <div class="col-lg-6">
+          <div class="camera-section">
+            <div
+              class="section-header"
+              style="
+                background: linear-gradient(135deg, var(--danger), #dc2626);
+                color: white;
+              "
+            >
+              <h4><i class="fas fa-sign-out-alt"></i> Камера выезда</h4>
+              <div class="status-badge status-online" id="exit-status">
+                <i class="fas fa-circle"></i> Онлайн
               </div>
-              {% else %}
-              <p class="text-muted">Нет неоплаченных выездов</p>
-              {% endif %}
+            </div>
+
+            <div class="camera-feed" id="exit-camera">
+              <div class="camera-placeholder" id="exit-placeholder">
+                <i class="fas fa-video"></i>
+                <div>Камера выезда</div>
+                <small>Нажмите "Захват" для получения кадра</small>
+              </div>
+              <div class="camera-controls">
+                <button class="btn-camera" onclick="captureImage('exit')">
+                  <i class="fas fa-camera me-1"></i>Захват
+                </button>
+                <button class="btn-camera" onclick="recognizePlate('exit')">
+                  <i class="fas fa-search me-1"></i>Распознать
+                </button>
+              </div>
+            </div>
+
+            <div class="recognition-panel">
+              <h6 class="mb-3">
+                <i class="fas fa-id-card me-2"></i>Распознанный номер:
+              </h6>
+              <div class="plate-display" id="exit-plate-display">
+                Ожидание...
+              </div>
+              <div class="row g-2">
+                <div class="col-8">
+                  <input
+                    type="text"
+                    id="exit-plate-input"
+                    class="form-control plate-input"
+                    placeholder="А123БВ77"
+                    maxlength="9"
+                  />
+                </div>
+                <div class="col-4">
+                  <button
+                    class="btn btn-warning w-100 btn-barrier"
+                    onclick="processExit()"
+                  >
+                    <i class="fas fa-sign-out-alt me-1"></i>Выезд
+                  </button>
+                </div>
+              </div>
+
+              <div id="payment-info" class="mt-3" style="display: none">
+                <div class="alert alert-warning">
+                  <strong>К оплате: <span id="payment-amount">0</span>₽</strong>
+                  <div class="mt-2">
+                    <button
+                      class="btn btn-primary btn-sm"
+                      onclick="generateQR()"
+                    >
+                      <i class="fas fa-qrcode me-1"></i>QR-код
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="markPaid()">
+                      <i class="fas fa-check me-1"></i>Оплачено
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="barrier-controls">
+              <h6 class="mb-3">
+                <i class="fas fa-road me-2"></i>Управление шлагбаумом
+              </h6>
+              <button
+                class="btn btn-success btn-barrier"
+                onclick="controlBarrier('exit', 'open')"
+              >
+                <i class="fas fa-unlock me-1"></i>Открыть
+              </button>
+              <button
+                class="btn btn-danger btn-barrier"
+                onclick="controlBarrier('exit', 'close')"
+              >
+                <i class="fas fa-lock me-1"></i>Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Настройки (форма) -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="settings-card">
+            <h5><i class="fas fa-cog me-2"></i>Настройки тарифов</h5>
+            <div class="row g-2 align-items-center">
+              <div class="col-4">
+                <label class="form-label">Базовая цена / час</label>
+                <input
+                  id="setting-base"
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                />
+              </div>
+              <div class="col-4">
+                <label class="form-label">Доп. цена / час</label>
+                <input
+                  id="setting-additional"
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                />
+              </div>
+              <div class="col-4">
+                <label class="form-label">Бесплатных минут</label>
+                <input
+                  id="setting-free"
+                  type="number"
+                  step="1"
+                  class="form-control"
+                />
+              </div>
+            </div>
+            <div class="mt-3">
+              <button class="btn btn-primary" onclick="saveSettings()">
+                <i class="fas fa-save me-1"></i>Сохранить
+              </button>
+              <button class="btn btn-secondary" onclick="loadSettings()">
+                <i class="fas fa-sync me-1"></i>Загрузить
+              </button>
+            </div>
+            <small class="text-muted d-block mt-2"
+              >Изменения применяются немедленно и будут использоваться при
+              расчёте стоимости.</small
+            >
+          </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="col-md-6">
+          <div class="camera-section">
+            <div
+              class="section-header"
+              style="
+                background: linear-gradient(135deg, var(--info), #0891b2);
+                color: white;
+              "
+            >
+              <h4><i class="fas fa-history"></i> Журнал активности</h4>
+              <button class="btn btn-light btn-sm" onclick="clearLog()">
+                <i class="fas fa-trash me-1"></i>Очистить
+              </button>
+            </div>
+            <div
+              class="activity-log p-3"
+              id="activity-log"
+              style="max-height: 400px; overflow-y: auto"
+            >
+              <div class="text-center text-muted">
+                <i class="fas fa-clock fa-2x mb-3"></i>
+                <p>Журнал пуст. События будут отображаться здесь.</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/main.js"></script>
+    <!-- QR Modal -->
+    <div class="modal fade" id="qrModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px">
+          <div
+            class="modal-header"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--primary),
+                var(--primary-dark)
+              );
+              color: white;
+            "
+          >
+            <h5 class="modal-title">
+              <i class="fas fa-qrcode me-2"></i>QR-код для оплаты
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body text-center p-4">
+            <div class="mb-3">
+              <h4>Номер: <span class="text-primary" id="qr-plate">-</span></h4>
+              <h4>Сумма: <span class="text-danger" id="qr-amount">0₽</span></h4>
+            </div>
+            <div id="qr-code" class="mb-3"></div>
+            <button
+              class="btn btn-success btn-barrier"
+              onclick="simulatePayment()"
+            >
+              <i class="fas fa-check me-1"></i>Симулировать оплату
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      // Автообновление каждые 30 секунд
-      setTimeout(() => {
-        location.reload();
-      }, 30000);
+      // Global state
+      let currentVehicle = null;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        loadSettings();
+        addLogEntry("Система администрирования запущена", "system");
+      });
+
+      // --- Settings ---
+      async function loadSettings() {
+        try {
+          const res = await fetch("/api/settings/");
+          if (!res.ok) throw new Error("Не удалось загрузить настройки");
+          const data = await res.json();
+          document.getElementById("setting-base").value =
+            data.base_price_per_hour ?? 50;
+          document.getElementById("setting-additional").value =
+            data.additional_price_per_hour ?? 30;
+          document.getElementById("setting-free").value =
+            data.free_minutes ?? 15;
+          addLogEntry("Настройки загружены", "system");
+        } catch (e) {
+          console.warn(e);
+          addLogEntry("Ошибка загрузки настроек", "system");
+        }
+      }
+
+      async function saveSettings() {
+        const payload = {
+          base_price_per_hour: parseFloat(
+            document.getElementById("setting-base").value || 50
+          ),
+          additional_price_per_hour: parseFloat(
+            document.getElementById("setting-additional").value || 30
+          ),
+          free_minutes: parseInt(
+            document.getElementById("setting-free").value || 15
+          ),
+        };
+        try {
+          const res = await fetch("/api/settings/", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error("Ошибка сохранения");
+          const data = await res.json();
+          addLogEntry("Настройки сохранены", "system");
+          showToast("Настройки обновлены", "success");
+        } catch (e) {
+          console.error(e);
+          showToast("Ошибка сохранения настроек", "error");
+        }
+      }
+
+      // --- Capture & Recognize (UI-only simulation) ---
+      async function captureImage(cameraType) {
+        const cameraFeed = document.getElementById(`${cameraType}-camera`);
+        const placeholder = document.getElementById(
+          `${cameraType}-placeholder`
+        );
+        showToast(`Захват изображения (${cameraType})...`, "info");
+        cameraFeed.classList.add("capturing");
+        placeholder.innerHTML = `<div class="spinner"></div><div class="mt-3">Захват изображения...</div>`;
+        try {
+          await new Promise((r) => setTimeout(r, 1200));
+          const img = document.createElement("img");
+          img.className = "camera-image";
+          img.src = generateMockCarImage();
+          placeholder.style.display = "none";
+          cameraFeed.appendChild(img);
+          cameraFeed.classList.remove("capturing");
+          cameraFeed.classList.add("active");
+          showToast("Изображение захвачено", "success");
+          setTimeout(() => recognizePlate(cameraType), 800);
+        } catch (e) {
+          showToast("Ошибка захвата", "error");
+        }
+      }
+
+      async function recognizePlate(cameraType) {
+        const plateDisplay = document.getElementById(
+          `${cameraType}-plate-display`
+        );
+        const plateInput = document.getElementById(`${cameraType}-plate-input`);
+        showToast("Распознавание номера...", "info");
+        plateDisplay.className = "plate-display";
+        plateDisplay.innerHTML = '<div class="spinner"></div>';
+        try {
+          await new Promise((r) => setTimeout(r, 1000));
+          // Здесь запрос к /api/camera/capture/{camera_type} можно выполнить,
+          // но пока — эмуляция распознавания (сделана детерминированно)
+          const recognizedPlate = generateMockPlate();
+          plateDisplay.textContent = recognizedPlate;
+          plateDisplay.classList.add("recognized");
+          plateInput.value = recognizedPlate;
+          showToast(`Номер распознан: ${recognizedPlate}`, "success");
+        } catch (e) {
+          plateDisplay.textContent = "Ошибка распознавания";
+          plateDisplay.classList.add("error");
+          showToast("Ошибка распознавания", "error");
+        }
+      }
+
+      // --- Entry processing (server-driven) ---
+      async function processEntry() {
+        const plateInput = document.getElementById("entry-plate-input");
+        const plate = plateInput.value.trim();
+        if (!plate) {
+          showToast("Введите номер", "warning");
+          return;
+        }
+        showToast("Обработка въезда...", "info");
+        try {
+          const res = await fetch("/api/vehicles/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              plate_number: plate,
+              entry_image: "web_entry_" + Date.now() + ".jpg",
+            }),
+          });
+          if (!res.ok) throw new Error("API error");
+          await controlBarrier("entry", "open");
+          addLogEntry(`Въезд: ${plate}`, "entry");
+          resetCamera("entry");
+          showToast(`Въезд подтверждён: ${plate}`, "success");
+          setTimeout(() => controlBarrier("entry", "close"), 5000);
+        } catch (e) {
+          console.warn(e);
+          // fallback: локальная запись в UI
+          addLogEntry(`(Эмуляция) Въезд: ${plate}`, "entry");
+          showToast("Режим эмуляции: въезд", "warning");
+        }
+      }
+
+      // замените функцию processExit() в admin.html на эту версию
+      async function processExit() {
+        const plateInput = document.getElementById("exit-plate-input");
+        const plate = plateInput.value.trim();
+
+        if (!plate) {
+          showToast("Введите номер автомобиля", "warning");
+          return;
+        }
+
+        if (!validatePlateNumber(plate)) {
+          showToast("Неверный формат номера", "error");
+          return;
+        }
+
+        try {
+          showToast("Запрос данных по выезду...", "info");
+
+          // Отправляем на сервер запрос обработки выезда
+          const response = await fetch("/api/vehicles/exit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              plate: plate,
+              exit_image: "mock_exit_" + Date.now() + ".jpg",
+            }),
+          });
+
+          if (response.status === 404) {
+            showToast("Открытая запись для этого номера не найдена", "error");
+            addLogEntry(`Попытка выезда: ${plate} - запись не найдена`, "exit");
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error("Ошибка сервера при обработке выезда");
+          }
+
+          const data = await response.json();
+          // data: { vehicle_id, plate, parking_fee, payment_qr, paid }
+
+          if (data.parking_fee && data.parking_fee > 0) {
+            // Показываем платёжную панель
+            document.getElementById("payment-amount").textContent =
+              data.parking_fee;
+            document.getElementById("payment-info").style.display = "block";
+            currentVehicle = {
+              plate: data.plate,
+              fee: data.parking_fee,
+              vehicle_id: data.vehicle_id,
+              payment_qr: data.payment_qr,
+            };
+
+            // Если сервер прислал qr
+            if (data.payment_qr) {
+              document.getElementById(
+                "qr-code"
+              ).innerHTML = `<img src="${data.payment_qr}" style="width:200px;height:200px;object-fit:contain"/>`;
+            }
+
+            addLogEntry(
+              `Выезд: ${plate} - к оплате ${data.parking_fee}₽`,
+              "exit"
+            );
+            showToast(`Требуется оплата: ${data.parking_fee}₽`, "warning");
+          } else {
+            // Бесплатный выезд — открылся шлагбаум на сервере
+            stats.exit.today++;
+            stats.exit.hour++;
+            updateStatsDisplay();
+            addLogEntry(`Бесплатный выезд: ${plate}`, "exit");
+            resetCamera("exit");
+            showToast(`Бесплатный выезд: ${plate}`, "success");
+          }
+        } catch (err) {
+          console.error(err);
+          showToast("Ошибка обработки выезда", "error");
+        }
+      }
+
+      // --- Generate QR & payment ---
+      function generateQR() {
+        if (!currentVehicle) {
+          showToast("Нет данных для QR", "error");
+          return;
+        }
+        document.getElementById("qr-plate").textContent = currentVehicle.plate;
+        document.getElementById("qr-amount").textContent =
+          currentVehicle.fee + "₽";
+        // Покажем модальное окно (в реале QR-код придёт с сервера - в vehicle.payment_qr)
+        const modal = new bootstrap.Modal(document.getElementById("qrModal"));
+        modal.show();
+        // В реальном мире - сюда вставим image src из currentVehicle.qr если есть
+        document.getElementById(
+          "qr-code"
+        ).innerHTML = `<div style="width:200px;height:200px;margin:0 auto;border-radius:12px;background:#f3f3f3;display:flex;align-items:center;justify-content:center;"><i class="fas fa-qrcode fa-3x"></i></div>`;
+        addLogEntry(`QR сгенерирован для ${currentVehicle.plate}`, "system");
+      }
+
+      async function markPaid() {
+        if (!currentVehicle) return;
+        try {
+          showToast("Отмечаем оплату...", "info");
+          // Обновляем запись через API оплаты: POST /api/payment/ или простое пометка paid
+          // Здесь используем процесс оплат (эмуляция)
+          await fetch("/api/payment/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              vehicle_id: currentVehicle.id,
+              amount: currentVehicle.fee,
+            }),
+          });
+          await controlBarrier("exit", "open");
+          addLogEntry(
+            `Оплата ${currentVehicle.plate}: ${currentVehicle.fee}₽ - выезд разрешен`,
+            "exit"
+          );
+          document.getElementById("payment-info").style.display = "none";
+          currentVehicle = null;
+          setTimeout(() => controlBarrier("exit", "close"), 5000);
+          showToast("Оплата зафиксирована, шлагбаум открыт", "success");
+        } catch (e) {
+          console.error(e);
+          showToast("Ошибка при отметке оплаты", "error");
+        }
+      }
+
+      async function simulatePayment() {
+        // закрыть модал и вызвать markPaid
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("qrModal")
+        );
+        modal.hide();
+        await markPaid();
+      }
+
+      // --- Barrier control (simple) ---
+      async function controlBarrier(barrierType, action) {
+        try {
+          showToast(
+            `${action === "open" ? "Открытие" : "Закрытие"} шлагбаума...`,
+            "info"
+          );
+          await fetch(`/api/barrier/${barrierType}/${action}`, {
+            method: "POST",
+          });
+          showToast("Команда отправлена", "success");
+          addLogEntry(`Шлагбаум ${barrierType} ${action}`, "system");
+          return true;
+        } catch (e) {
+          showToast("Ошибка управления шлагбаумом", "error");
+          return false;
+        }
+      }
+
+      // --- Utility functions ---
+      function resetCamera(cameraType) {
+        const cameraFeed = document.getElementById(`${cameraType}-camera`);
+        const placeholder = document.getElementById(
+          `${cameraType}-placeholder`
+        );
+        const plateDisplay = document.getElementById(
+          `${cameraType}-plate-display`
+        );
+        const plateInput = document.getElementById(`${cameraType}-plate-input`);
+        const existingImg = cameraFeed.querySelector(".camera-image");
+        if (existingImg) existingImg.remove();
+        placeholder.style.display = "flex";
+        placeholder.innerHTML = `<i class="fas fa-video"></i><div>Камера ${
+          cameraType === "entry" ? "въезда" : "выезда"
+        }</div><small>Нажмите "Захват" для получения кадра</small>`;
+        cameraFeed.className = "camera-feed";
+        plateDisplay.className = "plate-display";
+        plateDisplay.textContent = "Ожидание...";
+        plateInput.value = "";
+      }
+
+      function addLogEntry(message, type) {
+        const logContainer = document.getElementById("activity-log");
+        const timestamp = new Date().toLocaleTimeString("ru-RU");
+        const empty = logContainer.querySelector(".text-center");
+        if (empty) empty.remove();
+        const entry = document.createElement("div");
+        entry.className = `log-entry ${type || ""}`;
+        let icon = "fas fa-info-circle";
+        if (type === "entry") icon = "fas fa-sign-in-alt";
+        else if (type === "exit") icon = "fas fa-sign-out-alt";
+        else if (type === "system") icon = "fas fa-cog";
+        entry.innerHTML = `<div class="d-flex align-items-center"><i class="${icon} me-2"></i><div><div style="font-weight:700">${message}</div><small class="text-muted">${timestamp}</small></div></div>`;
+        logContainer.prepend(entry);
+      }
+
+      function clearLog() {
+        document.getElementById("activity-log").innerHTML =
+          '<div class="text-center text-muted"><i class="fas fa-clock fa-2x mb-3"></i><p>Журнал пуст. События будут отображаться здесь.</p></div>';
+      }
+
+      function showToast(text, type) {
+        // Простая заменка: console + небольшая визуальная вставка
+        console.log(`[${type}] ${text}`);
+      }
+
+      // --- Mock helpers used by UI when камера не подключена ---
+      function generateMockPlate() {
+        // Детерминированная генерация, дающая понятный формат
+        const letters = "АВЕКМНОРСТУХ";
+        const d = new Date();
+        const seed = d.getSeconds() + d.getMinutes() * 60;
+        const n = ((seed % 900) + 100).toString().padStart(3, "0");
+        const l1 = letters[seed % letters.length];
+        const l2 = letters[(seed + 3) % letters.length];
+        const l3 = letters[(seed + 7) % letters.length];
+        const region = (77 + (seed % 20)).toString();
+        return `${l1}${n}${l2}${l3}${region}`;
+      }
+
+      function generateMockCarImage() {
+        // возвращаем пустой data-uri или картинку-заглушку
+        return (
+          "data:image/svg+xml;charset=UTF-8," +
+          encodeURIComponent(
+            `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><rect width='100%' height='100%' fill='#333'/><text x='50%' y='50%' fill='#fff' font-size='24' text-anchor='middle' dominant-baseline='middle'>CAMERA IMAGE</text></svg>`
+          )
+        );
+      }
     </script>
   </body>
 </html>

@@ -1,17 +1,45 @@
+# FastAPI и веб-сервер
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
+jinja2==3.1.2
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# База данных
 sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 alembic==1.12.1
+
+# Pydantic для валидации
 pydantic==2.5.0
-python-multipart==0.0.6
-jinja2==3.1.2
+pydantic-settings==2.1.0
+
+# Работа с изображениями и OCR
 opencv-python==4.8.1.78
-numpy==1.24.3
-pillow==10.0.1
+pillow==10.1.0
+pytesseract==0.3.10
+numpy==1.25.2
+
+# HTTP клиент для камер
+aiohttp==3.9.1
 requests==2.31.0
+
+# QR коды
 qrcode[pil]==7.4.2
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
+
+# Логирование и утилиты
 python-dotenv==1.0.0
-aiofiles==23.2.1
+asyncio-throttle==1.0.2
+
+# Дополнительные библиотеки для обработки изображений
+scikit-image==0.22.0
+imutils==0.5.4
+
+# Для работы с датами
+python-dateutil==2.8.2
+
+# Тестирование (опционально)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2
